@@ -50,16 +50,32 @@
 			idleQueue.length = 0;
 		}
 		
-		public function ping():RedisCommand {
+		public function sendPING():RedisCommand {
 			return addCommand(new PING());
 		}
 		
-		public function echo(text:String):RedisCommand {
+		public function sendECHO(text:String):RedisCommand {
 			return addCommand(new ECHO(text));
 		}
 		
-		public function info():RedisCommand {
+		public function sendINFO():RedisCommand {
 			return addCommand(new INFO());
+		}
+		
+		public function sendSET(key:String, value:*):RedisCommand {
+			return addCommand(new SET(key, value));
+		}
+		
+		public function sendSETNX(key:String, value:*):RedisCommand {
+			return addCommand(new SETNX(key, value));
+		}
+		
+		public function sendGET(key:String):RedisCommand {
+			return addCommand(new GET(key));
+		}
+		
+		public function sendDEL(key:String):RedisCommand {
+			return addCommand(new DEL(key));
 		}
 		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
@@ -118,14 +134,14 @@
 			//trace("received " + socket.bytesAvailable + " bytes");
 			socket.readBytes(buffer, buffer.length, socket.bytesAvailable);
 			buffer.position = 0;
-			while (buffer.length - buffer.position >= 3) {
+			var commandProcessed:Boolean = true;
+			while (commandProcessed && buffer.length - buffer.position >= 3) {
 				var pos:uint = buffer.position;
 				var i:int = findCRLF(buffer, buffer.position);
 				if (i > 0) {
 					var curCommandIdx:int = getFirstActiveCommandIdx();
 					if (curCommandIdx >= 0) {
 						var len:uint;
-						var commandProcessed:Boolean = true;
 						var command:RedisCommand = activeQueue[curCommandIdx];
 						var type:String = String.fromCharCode(buffer.readUnsignedByte());
 						var head:String = buffer.readUTFBytes(i - buffer.position);
@@ -164,7 +180,7 @@
 								break;
 							case "*":
 								// TODO:
-								// len = parseInt(head);
+								var count:int = parseInt(head);
 								// command.setResponseType(RedisCommand.RESPONSE_TYPE_BULK_MULTI);
 								commandProcessed = false;
 								break;
@@ -174,9 +190,10 @@
 						if (commandProcessed) {
 							activeQueue.splice(curCommandIdx, 1);
 						}
+					} else {
+						throw(new Error("No active commands found."));
 					}
 				} else if (i == 0) {
-					// empty header
 					throw(new Error("Empty header."));
 				}
 			}

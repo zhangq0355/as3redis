@@ -78,6 +78,18 @@
 			return ba;
 		}
 		
+		protected function serializeValue(value:*):ByteArray {
+			var ba:ByteArray = new ByteArray();
+			if (value is String || value is Number || value is int || value is uint || value is Boolean) {
+				ba.writeUTFBytes(String(value));
+			} else if (value is ByteArray) {
+				ba = value as ByteArray;
+			} else {
+				ba.writeObject(value);
+			}
+			return ba;
+		}
+		
 		public function addResponder(responder:RedisResponder):void {
 			if (responders == null) {
 				responders = Vector.<RedisResponder>( [ responder ] );
