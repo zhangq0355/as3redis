@@ -50,6 +50,7 @@
 			idleQueue.length = 0;
 		}
 		
+		
 		public function sendPING():RedisCommand {
 			return addCommand(new PING());
 		}
@@ -97,6 +98,19 @@
 		public function sendDECRBY(key:String, value:uint):RedisCommand {
 			return addCommand(new DECRBY(key, value));
 		}
+		
+		public function sendEXISTS(key:String):RedisCommand {
+			return addCommand(new EXISTS(key));
+		}
+
+		public function sendTYPE(key:String):RedisCommand {
+			return addCommand(new TYPE(key));
+		}
+
+		public function sendMGET(keys:Array):RedisCommand {
+			return addCommand(new MGET(keys));
+		}
+
 		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
 			if (!defer) {
@@ -222,8 +236,50 @@
 								// TODO:
 								// This is multi bulk data
 								var count:int = parseInt(head);
-								// command.setResponseType(RedisCommand.RESPONSE_TYPE_BULK_MULTI);
-								commandProcessed = false;
+								if(count > 0) {
+									for (var j:uint = 0; j < count; j++) {
+										var nextcrlf:int = findCRLF(buffer, buffer.position);
+										if (nextcrlf >= 0) {
+											if (nextcrlf - buffer.position > 1) {
+												// The first byte of a redis response is always the type indicator
+												type = String.fromCharCode(buffer.readUnsignedByte());
+												// Followed by the rest, which is interpreted as a string
+												head = buffer.readUTFBytes(nextcrlf - buffer.position);
+												// Followed the CR/LF we found above
+												buffer.position += 2; // skip crlf
+												if (type == "$") {
+													len = parseInt(head);
+													if (len >= 0) {
+														// Check if the entire data block is loaded already
+														if (buffer.length - buffer.position - len - 2 >= 0) {
+															// Yes it is, so parse and save it
+															command.addBulkResponse(parseBulk(len));
+														} else {
+															// No, we need to wait for more data
+															// Set the position back to the beginning of the current response
+															buffer.position = pos;
+															commandProcessed = false;
+															break;
+														}
+													} else {
+														// Length can be -1 (no data available, non-existant key etc)
+														command.addBulkResponse(null);
+													}
+												}
+											} else {
+												throw(new Error("Empty header."));
+											}
+										} else {
+											buffer.position = pos;
+											commandProcessed = false;
+											break;
+										}
+									}
+								}
+								if (commandProcessed) {
+									command.setResponseType(RedisCommand.RESPONSE_TYPE_BULK_MULTI);
+									command.result();
+								}
 								break;
 							default:
 								throw(new Error("Illegal header type '" + type + "'."));
