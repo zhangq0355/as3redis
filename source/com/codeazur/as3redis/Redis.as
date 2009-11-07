@@ -82,6 +82,22 @@
 			return addCommand(new DEL(key));
 		}
 		
+		public function sendINCR(key:String):RedisCommand {
+			return addCommand(new INCR(key));
+		}
+		
+		public function sendINCRBY(key:String, value:uint):RedisCommand {
+			return addCommand(new INCRBY(key, value));
+		}
+		
+		public function sendDECR(key:String):RedisCommand {
+			return addCommand(new DECR(key));
+		}
+		
+		public function sendDECRBY(key:String, value:uint):RedisCommand {
+			return addCommand(new DECRBY(key, value));
+		}
+		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
 			if (!defer) {
 				executeCommand(command);
