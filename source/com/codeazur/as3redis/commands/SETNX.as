@@ -1,7 +1,5 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import flash.utils.ByteArray;
-
 	public class SETNX extends SET
 	{
 		public function SETNX(key:String, value:*)

@@ -94,15 +94,15 @@
 			var s:String;
 			if (value is String || value is Number || value is int || value is uint || value is Boolean) {
 				s = String(value);
+				if (s.length == 0) {
+					s = "<empty>";
+				}
 			} else if (value is ByteArray) {
 				s = "<binary:" + ByteArray(value).length + ">";
 			} else if (value == null || value == undefined) {
 				s = "<null>";
 			} else {
 				s = "<object>";
-			}
-			if (s.length == 0) {
-				s = "<empty>";
 			}
 			return s;
 		}

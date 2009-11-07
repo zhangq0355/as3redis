@@ -111,6 +111,34 @@
 			return addCommand(new MGET(keys));
 		}
 
+		public function sendKEYS(pattern:String):RedisCommand {
+			return addCommand(new KEYS(pattern));
+		}
+
+		public function sendRANDOMKEY():RedisCommand {
+			return addCommand(new RANDOMKEY());
+		}
+		
+		public function sendRENAME(oldKey:String, newKey:String):RedisCommand {
+			return addCommand(new RENAME(oldKey, newKey));
+		}
+
+		public function sendRENAMENX(oldKey:String, newKey:String):RedisCommand {
+			return addCommand(new RENAMENX(oldKey, newKey));
+		}
+
+		public function sendDBSIZE():RedisCommand {
+			return addCommand(new DBSIZE());
+		}
+
+		public function sendEXPIRE(key:String, seconds:uint):RedisCommand {
+			return addCommand(new EXPIRE(key, seconds));
+		}
+
+		public function sendTTL(key:String):RedisCommand {
+			return addCommand(new TTL(key));
+		}
+
 		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
 			if (!defer) {
