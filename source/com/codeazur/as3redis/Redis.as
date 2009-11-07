@@ -139,6 +139,46 @@
 			return addCommand(new TTL(key));
 		}
 
+		public function sendRPUSH(key:String, value:*):RedisCommand {
+			return addCommand(new RPUSH(key, value));
+		}
+
+		public function sendLPUSH(key:String, value:*):RedisCommand {
+			return addCommand(new LPUSH(key, value));
+		}
+
+		public function sendLLEN(key:String):RedisCommand {
+			return addCommand(new LLEN(key));
+		}
+
+		public function sendLRANGE(key:String, startIndex:int, endIndex:int):RedisCommand {
+			return addCommand(new LRANGE(key, startIndex, endIndex));
+		}
+
+		public function sendLREM(key:String, count:int, value:*):RedisCommand {
+			return addCommand(new LREM(key, count, value));
+		}
+
+		public function sendLTRIM(key:String, startIndex:int, endIndex:int):RedisCommand {
+			return addCommand(new LTRIM(key, startIndex, endIndex));
+		}
+
+		public function sendLINDEX(key:String, index:int):RedisCommand {
+			return addCommand(new LINDEX(key, index));
+		}
+
+		public function sendLSET(key:String, index:int, value:*):RedisCommand {
+			return addCommand(new LSET(key, index, value));
+		}
+
+		public function sendLPOP(key:String):RedisCommand {
+			return addCommand(new LPOP(key));
+		}
+
+		public function sendRPOP(key:String):RedisCommand {
+			return addCommand(new RPOP(key));
+		}
+
 		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
 			if (!defer) {
