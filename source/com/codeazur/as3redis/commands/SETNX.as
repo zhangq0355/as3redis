@@ -12,10 +12,5 @@
 		override public function get name():String {
 			return "SETNX";
 		}
-		
-		override public function toString():String {
-			return "[" + name + "] " + responseMessage;
-		}
 	}
-
 }

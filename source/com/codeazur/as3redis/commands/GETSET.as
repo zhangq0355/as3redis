@@ -27,14 +27,9 @@
 			ba.writeUTFBytes("\r\n");
 			return ba;
 		}
-		
-		override public function toString():String {
-			if (_bulkResponses != null && _bulkResponses.length == 1) {
-				return super.toString() + " " + _bulkResponses[0].readUTFBytes(_bulkResponses[0].length);
-			} else {
-				return super.toString() + " " + responseMessage;
-			}
+
+		override public function toStringCommand():String {
+			return "[" + name + " " + _key + " " + toStringValue(_value) + "]";
 		}
 	}
-
 }

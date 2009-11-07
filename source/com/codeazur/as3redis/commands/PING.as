@@ -11,10 +11,5 @@
 		override public function get name():String {
 			return "PING";
 		}
-		
-		override public function toString():String {
-			return super.toString() + " " + responseMessage;
-		}
 	}
-
 }

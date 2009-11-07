@@ -27,26 +27,9 @@
 			ba.writeUTFBytes(cmd);
 			return ba;
 		}
-		
-		override public function toString():String {
-			var s:String = super.toString();
-			if (_bulkResponses != null && _bulkResponses.length > 0) {
-				for (var i:uint = 0; i < _bulkResponses.length; i++) {
-					var val:String = "<null>";
-					if (_bulkResponses[i] != null) {
-						if (_bulkResponses[i].length > 0) {
-							val = _bulkResponses[i].readUTFBytes(_bulkResponses[i].length);
-						} else {
-							val = "<empty>";
-						}
-					}
-					s += "\n  " + i + ": " + val;
-				}
-			} else {
-				s += " " + _responseMessage;
-			}
-			return s;
+
+		override public function toStringCommand():String {
+			return "[" + name + ((_keys.length > 0) ? " " + _keys.join(" ") : "") + "]";
 		}
 	}
-
 }

@@ -24,14 +24,9 @@
 			ba.writeUTFBytes(name + " " + baText.length + "\r\n" + _text + "\r\n");
 			return ba;
 		}
-		
-		override public function toString():String {
-			if (_bulkResponses != null && _bulkResponses.length == 1) {
-				return super.toString() + " " + _bulkResponses[0].readUTFBytes(_bulkResponses[0].length);
-			} else {
-				return super.toString();
-			}
+
+		override public function toStringCommand():String {
+			return "[" + name + " " + _text + "]";
 		}
 	}
-
 }

@@ -50,7 +50,7 @@
 		}
 
 		override public function toString():String {
-			var s:String = super.toString();
+			var s:String = toStringCommand();
 			if (params[ROLE]) { s += "\r  Role: " + params[ROLE]; }
 			if (params[REDIS_VERSION]) { s += "\r  RedisVersion: " + params[REDIS_VERSION]; }
 			if (params[USED_MEMORY]) { s += "\r  UsedMemory: " + params[USED_MEMORY]; }
@@ -66,5 +66,4 @@
 			return s;
 		}
 	}
-
 }

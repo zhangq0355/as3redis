@@ -90,6 +90,23 @@
 			return ba;
 		}
 		
+		protected function toStringValue(value:*):String {
+			var s:String;
+			if (value is String || value is Number || value is int || value is uint || value is Boolean) {
+				s = String(value);
+			} else if (value is ByteArray) {
+				s = "<binary:" + ByteArray(value).length + ">";
+			} else if (value == null || value == undefined) {
+				s = "<null>";
+			} else {
+				s = "<object>";
+			}
+			if (s.length == 0) {
+				s = "<empty>";
+			}
+			return s;
+		}
+		
 		public function addResponder(responder:RedisResponder):void {
 			if (responders == null) {
 				responders = Vector.<RedisResponder>( [ responder ] );
@@ -125,6 +142,27 @@
 		}
 
 		public function toString():String {
+			var s:String = toStringCommand();
+			if (_bulkResponses != null && _bulkResponses.length > 0) {
+				for (var i:uint = 0; i < _bulkResponses.length; i++) {
+					var val:String = "<null>";
+					if (_bulkResponses[i] != null) {
+						if (_bulkResponses[i].length > 0) {
+							_bulkResponses[i].position = 0;
+							val = _bulkResponses[i].readUTFBytes(_bulkResponses[i].length);
+						} else {
+							val = "<empty>";
+						}
+					}
+					s += "\n  " + i + ": " + val;
+				}
+			} else if (_responseMessage.length > 0) {
+				s += "\n  " + _responseMessage;
+			}
+			return s;
+		}
+
+		public function toStringCommand():String {
 			return "[" + name + "]";
 		}
 	}

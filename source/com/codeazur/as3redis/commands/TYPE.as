@@ -22,10 +22,9 @@
 			ba.writeUTFBytes(name + " " + _key + "\r\n");
 			return ba;
 		}
-		
-		override public function toString():String {
-			return super.toString() + " " + responseMessage;
+
+		override public function toStringCommand():String {
+			return "[" + name + " key:" + _key + "]";
 		}
 	}
-
 }
