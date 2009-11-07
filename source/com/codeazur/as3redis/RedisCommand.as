@@ -116,6 +116,7 @@
 		}
 		
 		public function fault():void {
+			trace(toString());
 			if (hasResponders()) {
 				for (var i:uint = 0; i < responders.length; i++) {
 					responders[i].status();

@@ -74,6 +74,10 @@
 			return addCommand(new GET(key));
 		}
 		
+		public function sendGETSET(key:String, value:*):RedisCommand {
+			return addCommand(new GETSET(key, value));
+		}
+		
 		public function sendDEL(key:String):RedisCommand {
 			return addCommand(new DEL(key));
 		}
@@ -131,55 +135,76 @@
 		}
 		
 		protected function dataHandler(e:ProgressEvent):void {
-			//trace("received " + socket.bytesAvailable + " bytes");
+			// trace("received " + socket.bytesAvailable + " bytes");
+			// Read all available bytes from the socket and append them to the buffer
 			socket.readBytes(buffer, buffer.length, socket.bytesAvailable);
+			// Parse buffer from the start
 			buffer.position = 0;
 			var commandProcessed:Boolean = true;
 			while (commandProcessed && buffer.length - buffer.position >= 3) {
 				var pos:uint = buffer.position;
+				// Find the next CR/LF pair starting from the current position
 				var i:int = findCRLF(buffer, buffer.position);
 				if (i > 0) {
+					// We found a CR/LF, and there is data available to parse
+					// Find the first active command in the queue
 					var curCommandIdx:int = getFirstActiveCommandIdx();
 					if (curCommandIdx >= 0) {
-						var len:uint;
+						var len:int;
 						var command:RedisCommand = activeQueue[curCommandIdx];
+						// The first byte of a redis response is always the type indicator
 						var type:String = String.fromCharCode(buffer.readUnsignedByte());
+						// Followed by the rest, which is interpreted as a string
 						var head:String = buffer.readUTFBytes(i - buffer.position);
+						// Followed the CR/LF we found above
 						buffer.position += 2; // skip crlf
+						// So let's see what we're dealing with:
 						switch(type) {
 							case "-":
+								// This is an error message
 								command.setResponseType(RedisCommand.RESPONSE_TYPE_ERROR);
 								command.setResponseMessage(head);
 								command.fault();
 								break;
 							case "+":
+								// This is a single line reply
 								command.setResponseType(RedisCommand.RESPONSE_TYPE_STRING);
 								command.setResponseMessage(head);
 								command.result();
 								break;
 							case ":":
+								// This is an integer number
 								command.setResponseType(RedisCommand.RESPONSE_TYPE_INTEGER);
 								command.setResponseMessage(head);
 								command.result();
 								break;
 							case "$":
+								// This is bulk data
+								// Get the size of the data block
 								len = parseInt(head);
 								if (len >= 0) {
+									// Check if the entire data block is loaded already
 									if (buffer.length - buffer.position - len - 2 >= 0) {
+										// Yes it is, so parse and save it
 										command.addBulkResponse(parseBulk(len));
 										command.setResponseType(RedisCommand.RESPONSE_TYPE_BULK);
 										command.result();
 									} else {
+										// No, we need to wait for more data
+										// Set the position back to the beginning of the current response
 										buffer.position = pos;
 										commandProcessed = false;
 									}
 								} else {
+									// Length can be -1 (no data available, non-existant key etc)
 									command.setResponseType(RedisCommand.RESPONSE_TYPE_BULK);
+									command.setResponseMessage(head);
 									command.result();
 								}
 								break;
 							case "*":
 								// TODO:
+								// This is multi bulk data
 								var count:int = parseInt(head);
 								// command.setResponseType(RedisCommand.RESPONSE_TYPE_BULK_MULTI);
 								commandProcessed = false;
@@ -188,6 +213,7 @@
 								throw(new Error("Illegal header type '" + type + "'."));
 						}
 						if (commandProcessed) {
+							// Remove the command whose reply we just processed from the queue
 							activeQueue.splice(curCommandIdx, 1);
 						}
 					} else {
@@ -197,26 +223,33 @@
 					throw(new Error("Empty header."));
 				}
 			}
+			// Truncate the buffer, cut off the bytes we processed
 			if (buffer.position < buffer.length) {
 				var ba:ByteArray = new ByteArray();
 				ba.writeBytes(buffer, buffer.position, buffer.length - buffer.position);
 				buffer = ba;
 			} else {
+				// The whole buffer has been processed
 				buffer.length = 0;
 			}
 		}
 		
 		protected function parseBulk(len:int):ByteArray {
+			// Process the bulk data body
 			var ba:ByteArray = new ByteArray();
+			// Copy [len] bytes
 			if (len > 0) {
 				buffer.readBytes(ba, 0, len);
 				ba.position = 0;
 			}
+			// The data should be immediately followed by CR/LF
 			var idx:int = findCRLF(buffer, buffer.position);
 			if (idx >= 0) {
 				if (idx > buffer.position) {
+					// There's extra data, [len] bytes are not immediately followed by CR/LF
 					trace("Warning: skipped " + (idx - buffer.position) + " bytes after bulk data");
 				}
+				// Skip to after CR/LF (start of next reply)
 				buffer.position = idx + 2;
 			}
 			return ba;
