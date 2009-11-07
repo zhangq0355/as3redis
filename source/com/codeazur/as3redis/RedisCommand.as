@@ -115,6 +115,10 @@
 			}
 		}
 		
+		public function addInlineResponder(result:Function, fault:Function = null):void {
+			addResponder(new RedisResponder(result, fault));
+		}
+		
 		public function removeAllResponders():void {
 			responders = null;
 		}
@@ -124,19 +128,21 @@
 		}
 		
 		public function result():void {
-			trace(toString());
 			if (hasResponders()) {
 				for (var i:uint = 0; i < responders.length; i++) {
-					responders[i].result();
+					if (responders[i].result != null) {
+						responders[i].result(this);
+					}
 				}
 			}
 		}
 		
 		public function fault():void {
-			trace(toString());
 			if (hasResponders()) {
 				for (var i:uint = 0; i < responders.length; i++) {
-					responders[i].status();
+					if (responders[i].status != null) {
+						responders[i].status(this);
+					}
 				}
 			}
 		}

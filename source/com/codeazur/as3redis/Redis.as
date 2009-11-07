@@ -333,6 +333,8 @@
 														// Length can be -1 (no data available, non-existant key etc)
 														command.addBulkResponse(null);
 													}
+												} else {
+													throw(new Error("Illegal header type '" + type + "'."));
 												}
 											} else {
 												throw(new Error("Empty header."));

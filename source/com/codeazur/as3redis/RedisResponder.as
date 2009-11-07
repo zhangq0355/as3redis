@@ -1,15 +1,14 @@
 ﻿package com.codeazur.as3redis
 {
-	import flash.net.Responder;
-
-	public class RedisResponder extends Responder
+	public class RedisResponder
 	{
 		public var result:Function;
 		public var status:Function;
 		
 		public function RedisResponder(result:Function, status:Function = null)
 		{
-			super(result, status);
+			this.result = result;
+			this.status = status;
 		}
 		
 	}
