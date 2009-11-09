@@ -1,8 +1,6 @@
 ﻿package com.codeazur.as3redis 
 {
-	import flash.net.Responder;
 	import flash.utils.ByteArray;
-	import flash.utils.IDataInput;
 	
 	public class RedisCommand
 	{
@@ -20,11 +18,11 @@
 		protected var responders:Vector.<RedisResponder>;
 		
 		protected var _status:String = STATUS_IDLE;
+		protected var _request:ByteArray;
 		protected var _responseType:String = RESPONSE_TYPE_UNDEFINED;
 		protected var _responseMessage:String = "";
-		
-		protected var _request:ByteArray;
-		protected var _bulkResponses:Vector.<ByteArray>;
+		protected var _responseBulk:Vector.<ByteArray>;
+		protected var _responseBulkAsStrings:Array;
 		
 		public function RedisCommand()
 		{
@@ -33,6 +31,30 @@
 		public function get status():String { return _status; }
 		public function get responseType():String { return _responseType; }
 		public function get responseMessage():String { return _responseMessage; }
+		public function get responseBulk():Vector.<ByteArray> { return _responseBulk; }
+
+		public function get responseBulkAsStrings():Array {
+			if (_responseBulkAsStrings == null) {
+				if (_responseBulk != null && _responseBulk.length > 0) {
+					_responseBulkAsStrings = [];
+					var val:String;
+					for (var i:uint = 0; i < _responseBulk.length; i++) {
+						val = null;
+						var ba:ByteArray = _responseBulk[i];
+						if (ba != null) {
+							if (ba.length > 0) {
+								ba.position = 0;
+								val = ba.readUTFBytes(ba.length);
+							} else {
+								val = "";
+							}
+						}
+						_responseBulkAsStrings.push(val);
+					}
+				}
+			}
+			return _responseBulkAsStrings;
+		}
 		
 		internal function setStatus(value:String):void {
 			_status = value;
@@ -47,12 +69,17 @@
 		}
 
 		internal function addBulkResponse(response:ByteArray):void {
-			if (_bulkResponses == null) {
-				_bulkResponses = Vector.<ByteArray>( [ response ] );
+			_responseBulkAsStrings = null;
+			if (_responseBulk == null) {
+				_responseBulk = Vector.<ByteArray>( [ response ] );
 			} else {
-				_bulkResponses.push(response);
+				_responseBulk.push(response);
 			}
 			processBulkResponse(response);
+		}
+
+		internal function removeAllBulkResponses():void {
+			_responseBulk = null;
 		}
 		
 		protected function processBulkResponse(response:ByteArray):void {
@@ -80,7 +107,7 @@
 		
 		protected function serializeValue(value:*):ByteArray {
 			var ba:ByteArray = new ByteArray();
-			if (value is String || value is Number || value is int || value is uint || value is Boolean) {
+			if (value is String || value is Number || value is Boolean) {
 				ba.writeUTFBytes(String(value));
 			} else if (value is ByteArray) {
 				ba = value as ByteArray;
@@ -92,7 +119,7 @@
 		
 		protected function toStringValue(value:*):String {
 			var s:String;
-			if (value is String || value is Number || value is int || value is uint || value is Boolean) {
+			if (value is String || value is Number || value is Boolean) {
 				s = String(value);
 				if (s.length == 0) {
 					s = "<empty>";
@@ -149,21 +176,19 @@
 
 		public function toString():String {
 			var s:String = toStringCommand();
-			if (_bulkResponses != null && _bulkResponses.length > 0) {
-				for (var i:uint = 0; i < _bulkResponses.length; i++) {
-					var val:String = "<null>";
-					if (_bulkResponses[i] != null) {
-						if (_bulkResponses[i].length > 0) {
-							_bulkResponses[i].position = 0;
-							val = _bulkResponses[i].readUTFBytes(_bulkResponses[i].length);
-						} else {
-							val = "<empty>";
-						}
+			if (_responseMessage != null && _responseMessage.length > 0) {
+				s += "\n  " + _responseMessage;
+			}
+			if (responseBulkAsStrings != null) {
+				for (var i:uint = 0; i < responseBulkAsStrings.length; i++) {
+					var val:String = responseBulkAsStrings[i];
+					if (val == null) {
+						val = "<null>";
+					} else if (val == "") {
+						val = "<empty>";
 					}
 					s += "\n  " + i + ": " + val;
 				}
-			} else if (_responseMessage.length > 0) {
-				s += "\n  " + _responseMessage;
 			}
 			return s;
 		}

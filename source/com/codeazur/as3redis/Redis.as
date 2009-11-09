@@ -199,7 +199,7 @@
 					connectInternal(_host, _port, executePendingCommands);
 				}
 			} else {
-				trace("sending: " + command);
+				//trace("sending: " + command);
 				command.setStatus(RedisCommand.STATUS_ACTIVE);
 				socket.writeBytes(command.request);
 				if (flush) {
@@ -225,7 +225,7 @@
 		}
 
 		protected function connectHandler(e:Event):void {
-			trace("connected");
+			//trace("connected");
 			dispatchEvent(e.clone());
 			if (connectResultHandler != null) {
 				connectResultHandler();
@@ -254,7 +254,7 @@
 						var type:String = String.fromCharCode(buffer.readUnsignedByte());
 						// Followed by the rest, which is interpreted as a string
 						var head:String = buffer.readUTFBytes(i - buffer.position);
-						// Followed the CR/LF we found above
+						// Followed by the CR/LF we found above
 						buffer.position += 2; // skip crlf
 						// So let's see what we're dealing with:
 						switch(type) {
@@ -279,6 +279,7 @@
 							case "$":
 								// This is bulk data
 								// Get the size of the data block
+								command.removeAllBulkResponses();
 								len = parseInt(head);
 								if (len >= 0) {
 									// Check if the entire data block is loaded already
@@ -303,6 +304,7 @@
 							case "*":
 								// TODO:
 								// This is multi bulk data
+								command.removeAllBulkResponses();
 								var count:int = parseInt(head);
 								if(count > 0) {
 									for (var j:uint = 0; j < count; j++) {
@@ -315,6 +317,7 @@
 												head = buffer.readUTFBytes(nextcrlf - buffer.position);
 												// Followed the CR/LF we found above
 												buffer.position += 2; // skip crlf
+												// Response type must be bulk data
 												if (type == "$") {
 													len = parseInt(head);
 													if (len >= 0) {
