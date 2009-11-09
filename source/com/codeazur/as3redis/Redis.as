@@ -179,6 +179,70 @@
 			return addCommand(new RPOP(key));
 		}
 
+		public function sendFLUSHDB():RedisCommand {
+			return addCommand(new FLUSHDB());
+		}
+
+		public function sendFLUSHALL():RedisCommand {
+			return addCommand(new FLUSHALL());
+		}
+
+		public function sendSADD(key:String, value:*):RedisCommand {
+			return addCommand(new SADD(key, value));
+		}
+
+		public function sendSREM(key:String, value:*):RedisCommand {
+			return addCommand(new SREM(key, value));
+		}
+
+		public function sendSPOP(key:String):RedisCommand {
+			return addCommand(new SPOP(key));
+		}
+
+		public function sendSMOVE(sourceKey:String, destinationKey:String, value:*):RedisCommand {
+			return addCommand(new SMOVE(sourceKey, destinationKey, value));
+		}
+
+		public function sendSCARD(key:String):RedisCommand {
+			return addCommand(new SCARD(key));
+		}
+
+		public function sendSISMEMBER(key:String, value:*):RedisCommand {
+			return addCommand(new SISMEMBER(key, value));
+		}
+
+		public function sendSINTER(keys:Array):RedisCommand {
+			return addCommand(new SINTER(keys));
+		}
+
+		public function sendSINTERSTORE(destinationKey:String, keys:Array):RedisCommand {
+			return addCommand(new SINTERSTORE(destinationKey, keys));
+		}
+
+		public function sendSUNION(keys:Array):RedisCommand {
+			return addCommand(new SUNION(keys));
+		}
+
+		public function sendSUNIONSTORE(destinationKey:String, keys:Array):RedisCommand {
+			return addCommand(new SUNIONSTORE(destinationKey, keys));
+		}
+
+		public function sendSDIFF(keys:Array):RedisCommand {
+			return addCommand(new SDIFF(keys));
+		}
+
+		public function sendSDIFFSTORE(destinationKey:String, keys:Array):RedisCommand {
+			return addCommand(new SDIFFSTORE(destinationKey, keys));
+		}
+
+		public function sendSMEMBERS(key:String):RedisCommand {
+			return addCommand(new SMEMBERS(key));
+		}
+
+		public function sendSRANDMEMBER(key:String):RedisCommand {
+			return addCommand(new SRANDMEMBER(key));
+		}
+
 		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
 			if (!defer) {
