@@ -32,6 +32,9 @@
 			activeQueue = new Vector.<RedisCommand>();
 			buffer = new ByteArray();
 		}
+		
+		public function get password():String { return _password; }
+		public function set password(value:String):void { _password = value; }
 
 		public function get connected():Boolean { return socket.connected; }
 		
@@ -50,6 +53,10 @@
 			idleQueue.length = 0;
 		}
 		
+		
+		public function sendAUTH(password:String):RedisCommand {
+			return addCommand(new AUTH(password));
+		}
 		
 		public function sendPING():RedisCommand {
 			return addCommand(new PING());
@@ -289,10 +296,27 @@
 		}
 
 		protected function connectHandler(e:Event):void {
-			//trace("connected");
+			// Redispatch the event
 			dispatchEvent(e.clone());
-			if (connectResultHandler != null) {
-				connectResultHandler();
+			// Authentication
+			if (_password) {
+				// A password is set, so we have to send the AUTH command first
+				var cmd:AUTH = new AUTH(_password);
+				// We immediately send it
+				cmd.setStatus(RedisCommand.STATUS_ACTIVE);
+				// Put the command at the beginning of the queue
+				activeQueue.splice(0, 0, cmd);
+				// Send the command
+				socket.writeBytes(cmd.request);
+				socket.flush();
+				// Add an internal responder that executes the result handler (if set)
+				// TODO: proper handling of errors
+				cmd.addInlineResponder(
+					function(cmd:AUTH) { if (connectResultHandler != null) { connectResultHandler(); } },
+					function(cmd:AUTH) { if (connectResultHandler != null) { connectResultHandler(); } }
+				);
+			} else {
+				if (connectResultHandler != null) { connectResultHandler(); } 
 			}
 		}
 		
