@@ -142,7 +142,7 @@
 			}
 		}
 		
-		public function addInlineResponder(result:Function, fault:Function = null):void {
+		public function addSimpleResponder(result:Function, fault:Function = null):void {
 			addResponder(new RedisResponder(result, fault));
 		}
 		

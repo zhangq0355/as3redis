@@ -311,7 +311,7 @@
 				socket.flush();
 				// Add an internal responder that executes the result handler (if set)
 				// TODO: proper handling of errors
-				cmd.addInlineResponder(
+				cmd.addSimpleResponder(
 					function(cmd:AUTH) { if (connectResultHandler != null) { connectResultHandler(); } },
 					function(cmd:AUTH) { if (connectResultHandler != null) { connectResultHandler(); } }
 				);
