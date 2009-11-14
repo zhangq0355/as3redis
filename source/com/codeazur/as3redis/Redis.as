@@ -280,6 +280,14 @@
 		public function sendSHUTDOWN():RedisCommand {
 			return addCommand(new SHUTDOWN());
 		}
+		
+		public function sendSELECT(dbIndex:uint):RedisCommand {
+			return addCommand(new SELECT(dbIndex));
+		}
+		
+		public function sendMOVE(key:String, dbIndex:uint):RedisCommand {
+			return addCommand(new MOVE(key, dbIndex));
+		}
 
 		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
