@@ -264,6 +264,22 @@
 		public function sendSLAVEOF(host:String = null, port:int = -1):RedisCommand {
 			return addCommand(new SLAVEOF(host, port));
 		}
+		
+		public function sendSAVE():RedisCommand {
+			return addCommand(new SAVE());
+		}
+		
+		public function sendBGSAVE():RedisCommand {
+			return addCommand(new BGSAVE());
+		}
+		
+		public function sendLASTSAVE():RedisCommand {
+			return addCommand(new LASTSAVE());
+		}
+		
+		public function sendSHUTDOWN():RedisCommand {
+			return addCommand(new SHUTDOWN());
+		}
 
 		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
