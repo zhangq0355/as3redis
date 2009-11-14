@@ -55,6 +55,7 @@ package com.codeazur.as3redis.commands
 			if(_getPatterns != null && _getPatterns.length > 0) {
 				ba.writeUTFBytes(" GET " + _getPatterns.join(" GET "));
 			}
+			ba.writeUTFBytes("\r\n");
 			return ba;
 		}
 
