@@ -60,29 +60,22 @@
 			idleQueue.length = 0;
 		}
 		
+
+		// Connection handling
+		
+		public function sendQUIT():RedisCommand {
+			return addCommand(new QUIT());
+		}
 		
 		public function sendAUTH(password:String):RedisCommand {
 			return addCommand(new AUTH(password));
 		}
 		
-		public function sendPING():RedisCommand {
-			return addCommand(new PING());
-		}
 		
-		public function sendECHO(text:String):RedisCommand {
-			return addCommand(new ECHO(text));
-		}
-		
-		public function sendINFO():RedisCommand {
-			return addCommand(new INFO());
-		}
+		// Commands operating on string values
 		
 		public function sendSET(key:String, value:*):RedisCommand {
 			return addCommand(new SET(key, value));
-		}
-		
-		public function sendSETNX(key:String, value:*):RedisCommand {
-			return addCommand(new SETNX(key, value));
 		}
 		
 		public function sendGET(key:String):RedisCommand {
@@ -93,8 +86,12 @@
 			return addCommand(new GETSET(key, value));
 		}
 		
-		public function sendDEL(key:String):RedisCommand {
-			return addCommand(new DEL(key));
+		public function sendMGET(keys:Array):RedisCommand {
+			return addCommand(new MGET(keys));
+		}
+		
+		public function sendSETNX(key:String, value:*):RedisCommand {
+			return addCommand(new SETNX(key, value));
 		}
 		
 		public function sendINCR(key:String):RedisCommand {
@@ -117,14 +114,17 @@
 			return addCommand(new EXISTS(key));
 		}
 
+		public function sendDEL(key:String):RedisCommand {
+			return addCommand(new DEL(key));
+		}
+		
 		public function sendTYPE(key:String):RedisCommand {
 			return addCommand(new TYPE(key));
 		}
 
-		public function sendMGET(keys:Array):RedisCommand {
-			return addCommand(new MGET(keys));
-		}
-
+		
+		// Commands operating on the key space
+		
 		public function sendKEYS(pattern:String):RedisCommand {
 			return addCommand(new KEYS(pattern));
 		}
@@ -153,6 +153,9 @@
 			return addCommand(new TTL(key));
 		}
 
+		
+		// Commands operating on lists
+		
 		public function sendRPUSH(key:String, value:*):RedisCommand {
 			return addCommand(new RPUSH(key, value));
 		}
@@ -169,10 +172,6 @@
 			return addCommand(new LRANGE(key, startIndex, endIndex));
 		}
 
-		public function sendLREM(key:String, count:int, value:*):RedisCommand {
-			return addCommand(new LREM(key, count, value));
-		}
-
 		public function sendLTRIM(key:String, startIndex:int, endIndex:int):RedisCommand {
 			return addCommand(new LTRIM(key, startIndex, endIndex));
 		}
@@ -185,6 +184,10 @@
 			return addCommand(new LSET(key, index, value));
 		}
 
+		public function sendLREM(key:String, count:int, value:*):RedisCommand {
+			return addCommand(new LREM(key, count, value));
+		}
+		
 		public function sendLPOP(key:String):RedisCommand {
 			return addCommand(new LPOP(key));
 		}
@@ -192,15 +195,15 @@
 		public function sendRPOP(key:String):RedisCommand {
 			return addCommand(new RPOP(key));
 		}
-
-		public function sendFLUSHDB():RedisCommand {
-			return addCommand(new FLUSHDB());
+		
+		// Version 1.1
+		public function sendRPOPLPUSH(sourceKey:String, destinationKey:String):RedisCommand {
+			return addCommand(new RPOPLPUSH(sourceKey, destinationKey));
 		}
 
-		public function sendFLUSHALL():RedisCommand {
-			return addCommand(new FLUSHALL());
-		}
 
+		// Commands operating on sets
+		
 		public function sendSADD(key:String, value:*):RedisCommand {
 			return addCommand(new SADD(key, value));
 		}
@@ -253,17 +256,32 @@
 			return addCommand(new SMEMBERS(key));
 		}
 
+		// Version 1.1
 		public function sendSRANDMEMBER(key:String):RedisCommand {
 			return addCommand(new SRANDMEMBER(key));
 		}
 		
-		public function sendMONITOR():RedisCommand {
-			return addCommand(new MONITOR());
+		
+		// Multiple databases handling commands
+		
+		public function sendSELECT(dbIndex:uint):RedisCommand {
+			return addCommand(new SELECT(dbIndex));
 		}
 		
-		public function sendSLAVEOF(host:String = null, port:int = -1):RedisCommand {
-			return addCommand(new SLAVEOF(host, port));
+		public function sendMOVE(key:String, dbIndex:uint):RedisCommand {
+			return addCommand(new MOVE(key, dbIndex));
 		}
+		
+		public function sendFLUSHDB():RedisCommand {
+			return addCommand(new FLUSHDB());
+		}
+		
+		public function sendFLUSHALL():RedisCommand {
+			return addCommand(new FLUSHALL());
+		}
+
+		
+		// Persistence control commands
 		
 		public function sendSAVE():RedisCommand {
 			return addCommand(new SAVE());
@@ -280,15 +298,33 @@
 		public function sendSHUTDOWN():RedisCommand {
 			return addCommand(new SHUTDOWN());
 		}
-		
-		public function sendSELECT(dbIndex:uint):RedisCommand {
-			return addCommand(new SELECT(dbIndex));
-		}
-		
-		public function sendMOVE(key:String, dbIndex:uint):RedisCommand {
-			return addCommand(new MOVE(key, dbIndex));
-		}
 
+		
+		// Remote server control commands
+		
+		public function sendINFO():RedisCommand {
+			return addCommand(new INFO());
+		}
+		
+		public function sendMONITOR():RedisCommand {
+			return addCommand(new MONITOR());
+		}
+		
+		public function sendSLAVEOF(host:String = null, port:int = -1):RedisCommand {
+			return addCommand(new SLAVEOF(host, port));
+		}
+		
+		
+		// Misc commands (undocumented)
+		
+		public function sendPING():RedisCommand {
+			return addCommand(new PING());
+		}
+		
+		public function sendECHO(text:String):RedisCommand {
+			return addCommand(new ECHO(text));
+		}
+		
 		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
 			if (!defer) {
