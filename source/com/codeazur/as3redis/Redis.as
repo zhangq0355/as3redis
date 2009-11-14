@@ -281,6 +281,13 @@
 		}
 
 		
+		// Sorting
+		
+		public function sendSORT(key:String, limitMin:int = -1, limitMax:int = -1, desc:Boolean = false, alpha:Boolean = false, byPattern:String = null, getPatterns:Array = null):RedisCommand {
+			return addCommand(new SORT(key, limitMin, limitMax, desc, alpha, byPattern, getPatterns));
+		}
+
+		
 		// Persistence control commands
 		
 		public function sendSAVE():RedisCommand {
