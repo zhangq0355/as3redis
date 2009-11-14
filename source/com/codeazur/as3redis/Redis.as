@@ -260,6 +260,10 @@
 		public function sendMONITOR():RedisCommand {
 			return addCommand(new MONITOR());
 		}
+		
+		public function sendSLAVEOF(host:String = null, port:int = -1):RedisCommand {
+			return addCommand(new SLAVEOF(host, port));
+		}
 
 		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
