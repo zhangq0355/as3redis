@@ -1,12 +1,15 @@
 ﻿package com.codeazur.as3redis
 {
+	import com.codeazur.as3redis.commands.*;
+	import com.codeazur.as3redis.events.RedisMonitorDataEvent;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
+	import flash.events.SecurityErrorEvent;
 	import flash.net.Socket;
 	import flash.utils.ByteArray;
-	
-	import com.codeazur.as3redis.commands.*;
 
 	public class Redis extends EventDispatcher
 	{
@@ -25,12 +28,16 @@
 		{
 			_host = host;
 			_port = port;
-			socket = new Socket();
-			socket.addEventListener(Event.CONNECT, connectHandler);
-			socket.addEventListener(ProgressEvent.SOCKET_DATA, dataHandler);
+
 			idleQueue = new Vector.<RedisCommand>();
 			activeQueue = new Vector.<RedisCommand>();
 			buffer = new ByteArray();
+
+			socket = new Socket();
+			socket.addEventListener(Event.CONNECT, connectHandler);
+			socket.addEventListener(ProgressEvent.SOCKET_DATA, dataHandler);
+			socket.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+			socket.addEventListener(SecurityErrorEvent.SECURITY_ERROR, errorHandler);
 		}
 		
 		public function get password():String { return _password; }
@@ -249,6 +256,10 @@
 		public function sendSRANDMEMBER(key:String):RedisCommand {
 			return addCommand(new SRANDMEMBER(key));
 		}
+		
+		public function sendMONITOR():RedisCommand {
+			return addCommand(new MONITOR());
+		}
 
 		
 		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
@@ -312,12 +323,17 @@
 				// Add an internal responder that executes the result handler (if set)
 				// TODO: proper handling of errors
 				cmd.addSimpleResponder(
-					function(cmd:AUTH) { if (connectResultHandler != null) { connectResultHandler(); } },
-					function(cmd:AUTH) { if (connectResultHandler != null) { connectResultHandler(); } }
+					function(cmd:AUTH):void { if (connectResultHandler != null) { connectResultHandler(); } },
+					function(cmd:AUTH):void { if (connectResultHandler != null) { connectResultHandler(); } }
 				);
 			} else {
 				if (connectResultHandler != null) { connectResultHandler(); } 
 			}
+		}
+		
+		protected function errorHandler(e:Event):void {
+			// Redispatch the event
+			dispatchEvent(e.clone());
 		}
 		
 		protected function dataHandler(e:ProgressEvent):void {
@@ -390,7 +406,6 @@
 								}
 								break;
 							case "*":
-								// TODO:
 								// This is multi bulk data
 								command.removeAllBulkResponses();
 								var count:int = parseInt(head);
@@ -443,9 +458,18 @@
 								}
 								break;
 							default:
-								throw(new Error("Illegal header type '" + type + "'."));
+								if(command is MONITOR) {
+									var event:RedisMonitorDataEvent = new RedisMonitorDataEvent(
+										RedisMonitorDataEvent.MONITOR_DATA,
+										type + head
+									);
+									dispatchEvent(event);
+								} else {
+									throw(new Error("Illegal header type '" + type + "'."));
+								}
+								break;
 						}
-						if (commandProcessed) {
+						if (commandProcessed && !(command is MONITOR)) {
 							// Remove the command whose reply we just processed from the queue
 							activeQueue.splice(curCommandIdx, 1);
 						}
