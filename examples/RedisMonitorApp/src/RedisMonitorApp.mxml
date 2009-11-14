@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/halo"
+	creationComplete="creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.codeazur.as3redis.Redis;
+			import com.codeazur.as3redis.RedisCommand;
+			import com.codeazur.as3redis.events.RedisMonitorDataEvent;
+			import mx.events.FlexEvent;
+			
+			protected static const REDIS_DOMAIN:String = "127.0.0.1";
+			protected static const REDIS_PORT:int = 6379;
+			
+			protected var redis:Redis;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				redis = new Redis(REDIS_DOMAIN, REDIS_PORT);
+				
+				redis.sendMONITOR().addSimpleResponder(
+					function(cmd:RedisCommand):void {
+						redis.addEventListener(RedisMonitorDataEvent.MONITOR_DATA, monitorDataHandler);
+						trace(cmd);
+					}
+				);
+			}
+			
+			protected function monitorDataHandler(event:RedisMonitorDataEvent):void {
+				trace(event.command);
+				messages.addItem({ label:event.command });
+			}
+		]]>
+	</fx:Script>
+		
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+	<s:List width="100%" height="100%">
+		<s:dataProvider>
+			<s:ArrayList id="messages" />
+		</s:dataProvider>
+	</s:List>
+	
+</s:WindowedApplication>
