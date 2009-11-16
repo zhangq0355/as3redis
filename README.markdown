@@ -1,5 +1,3 @@
-# as3redis
-
 ## Usage
 
 First you create an instance of the main Redis connector class:
@@ -10,15 +8,15 @@ This initializes the connector, but does not connect to the server yet. The defa
 
 ### Connecting to a server
 
-You don't need to explicitly connect to the server, as3redis does that for you behing the scenes. You can do that, though, if you need to:
+You don't need to explicitly connect to the server, as3redis does that for you behind the scenes. You can do that, though, if you need to:
 
 	var redis:Redis = new Redis();
 	redis.addEventListener(Event.CONNECT, connectHandler);
 	redis.connect();
 
-### Authentification
+### Authentication
 
-Redis allows for simple authentification through the AUTH command. If you set up your Redis instance to require a password, just set the password property before the server connects:
+Redis allows for simple authentication through the AUTH command. If you set up your Redis instance to require a password, just set the password property before the server connects:
 
 	var redis:Redis = new Redis();
 	redis.password = "joshua";
