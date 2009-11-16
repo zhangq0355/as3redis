@@ -49,6 +49,21 @@ To get notified by as3redis when a response was received for a specific command,
 			trace(cmd);
 		}
 	);
+	
+	// Trace output:
+	// [INFO]
+	//   Role: master
+	//   RedisVersion: 1.02
+	//   UsedMemory: 963206
+	//   UptimeInSeconds: 1076279
+	//   UptimeInDays: 12
+	//   ConnectedClients: 1
+	//   ConnectedSlaves: 0
+	//   LastSaveTime: Mon Nov 16 10:58:35 GMT-0200 2009
+	//   ChangesSinceLastSave: 0
+	//   BGSaveInProgress: 0
+	//   TotalConnectionsReceived: 432
+	//   TotalCommandsProcessed: 27770	
 
 You can (and should) also catch error responses:
 
@@ -71,9 +86,14 @@ Or use one responder for all commands:
 	redis.sendGET("key").addResponder(responder);
 	
 	function success(cmd:RedisCommand):void {
-		trace("OK!", cmd);
+		trace(cmd);
 	}
 	function fault(cmd:RedisCommand):void {
-		trace("ERROR!", cmd);
+		trace("ERROR!\r" + cmd);
 	}
-
+	
+	// Trace output:
+	// [SETNX key value]
+	//   1
+	// [GET key]
+	//   0: value
