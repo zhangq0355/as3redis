@@ -18,8 +18,8 @@
 		}
 		
 		override public function send(stream:IDataOutput):void {
-			super.send(stream);
 			stream.writeUTFBytes(name + " " + _password + "\r\n");
+			super.send(stream);
 		}
 
 		override public function toStringCommand():String {

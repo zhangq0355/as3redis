@@ -30,7 +30,6 @@ package com.codeazur.as3redis.commands
 		}
 		
 		override public function send(stream:IDataOutput):void {
-			super.send(stream);
 			stream.writeUTFBytes(name + " " + _key);
 			if(_limitMin >= 0 && _limitMax >= 0) {
 				stream.writeUTFBytes(" LIMIT " + _limitMin + " " + _limitMax);
@@ -56,6 +55,7 @@ package com.codeazur.as3redis.commands
 				stream.writeUTFBytes(" GET " + _getPatterns.join(" GET "));
 			}
 			stream.writeUTFBytes("\r\n");
+			super.send(stream);
 		}
 		
 		override public function toStringCommand():String {

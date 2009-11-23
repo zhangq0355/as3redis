@@ -11,8 +11,8 @@ package com.codeazur.as3redis.commands.base
 		}
 		
 		override public function send(stream:IDataOutput):void {
-			super.send(stream);
 			stream.writeUTFBytes(name + "\r\n");
+			super.send(stream);
 		}
 	}
 }

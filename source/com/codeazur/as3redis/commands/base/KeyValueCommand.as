@@ -17,11 +17,11 @@ package com.codeazur.as3redis.commands.base
 		}
 		
 		override public function send(stream:IDataOutput):void {
-			super.send(stream);
 			var baValue:ByteArray = serializeValue(_value);
 			stream.writeUTFBytes(name + " " + _key + " " + baValue.length + "\r\n");
 			stream.writeBytes(baValue);
 			stream.writeUTFBytes("\r\n");
+			super.send(stream);
 		}
 		
 		override public function toStringCommand():String {

@@ -18,13 +18,13 @@
 		}
 		
 		override public function send(stream:IDataOutput):void {
-			super.send(stream);
 			var cmd:String = name;
 			for (var i:uint = 0; i < _keys.length; i++) {
 				cmd += " " + _keys[i];
 			}
 			cmd += "\r\n";
 			stream.writeUTFBytes(cmd);
+			super.send(stream);
 		}
 
 		override public function toStringCommand():String {

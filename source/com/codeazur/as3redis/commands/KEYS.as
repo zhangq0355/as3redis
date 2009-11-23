@@ -23,8 +23,8 @@
 		}
 		
 		override public function send(stream:IDataOutput):void {
-			super.send(stream);
 			stream.writeUTFBytes(name + " " + _pattern + "\r\n");
+			super.send(stream);
 		}
 
 		override protected function processBulkResponse(response:ByteArray):void {
