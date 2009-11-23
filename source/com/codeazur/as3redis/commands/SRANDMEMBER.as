@@ -1,6 +1,6 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import flash.utils.ByteArray;
+	import flash.utils.IDataOutput;
 
 	import com.codeazur.as3redis.RedisCommand;
 	
@@ -17,12 +17,10 @@
 			return "SRANDMEMBER";
 		}
 		
-		override protected function createRequest():ByteArray {
-			var ba:ByteArray = new ByteArray();
-			ba.writeUTFBytes(name + " " + _key + "\r\n");
-			return ba;
+		override public function send(stream:IDataOutput):void {
+			stream.writeUTFBytes(name + " " + _key + "\r\n");
 		}
-
+		
 		override public function toStringCommand():String {
 			return "[" + name + " " + _key + "]";
 		}

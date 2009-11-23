@@ -2,7 +2,7 @@ package com.codeazur.as3redis.commands
 {
 	import com.codeazur.as3redis.RedisCommand;
 	
-	import flash.utils.ByteArray;
+	import flash.utils.IDataOutput;
 	
 	public class SORT extends RedisCommand
 	{
@@ -29,36 +29,34 @@ package com.codeazur.as3redis.commands
 			return "SORT";
 		}
 		
-		override protected function createRequest():ByteArray {
-			var ba:ByteArray = new ByteArray();
-			ba.writeUTFBytes(name + " " + _key);
+		override public function send(stream:IDataOutput):void {
+			stream.writeUTFBytes(name + " " + _key);
 			if(_limitMin >= 0 && _limitMax >= 0) {
-				ba.writeUTFBytes(" LIMIT " + _limitMin + " " + _limitMax);
+				stream.writeUTFBytes(" LIMIT " + _limitMin + " " + _limitMax);
 			} else if(!(_limitMin < 0 && _limitMax < 0)) {
 				_limitMin = Math.max(0, _limitMin);
 				_limitMax = Math.max(0, _limitMax);
 				if(_limitMin < _limitMax) {
-					ba.writeUTFBytes(" LIMIT " + _limitMin + " " + _limitMax);
+					stream.writeUTFBytes(" LIMIT " + _limitMin + " " + _limitMax);
 				} else if(_limitMin > _limitMax) {
-					ba.writeUTFBytes(" LIMIT " + _limitMax + " " + _limitMin);
+					stream.writeUTFBytes(" LIMIT " + _limitMax + " " + _limitMin);
 				}
 			}
 			if(_desc) {
-				ba.writeUTFBytes(" DESC");
+				stream.writeUTFBytes(" DESC");
 			}
 			if(_alpha) {
-				ba.writeUTFBytes(" ALPHA");
+				stream.writeUTFBytes(" ALPHA");
 			}
 			if(_byPattern != null) {
-				ba.writeUTFBytes(" BY " + _byPattern);
+				stream.writeUTFBytes(" BY " + _byPattern);
 			}
 			if(_getPatterns != null && _getPatterns.length > 0) {
-				ba.writeUTFBytes(" GET " + _getPatterns.join(" GET "));
+				stream.writeUTFBytes(" GET " + _getPatterns.join(" GET "));
 			}
-			ba.writeUTFBytes("\r\n");
-			return ba;
+			stream.writeUTFBytes("\r\n");
 		}
-
+		
 		override public function toStringCommand():String {
 			var s:String = name + " " + _key;
 			if(_limitMin >= 0 && _limitMax >= 0) {

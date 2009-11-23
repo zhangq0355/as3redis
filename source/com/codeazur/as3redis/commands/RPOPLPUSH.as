@@ -1,8 +1,8 @@
 package com.codeazur.as3redis.commands
 {
-	import flash.utils.ByteArray;
-
 	import com.codeazur.as3redis.RedisCommand;
+	
+	import flash.utils.IDataOutput;
 	
 	public class RPOPLPUSH extends RedisCommand
 	{
@@ -19,10 +19,8 @@ package com.codeazur.as3redis.commands
 			return "RPOPLPUSH";
 		}
 		
-		override protected function createRequest():ByteArray {
-			var ba:ByteArray = new ByteArray();
-			ba.writeUTFBytes(name + " " + _sourceKey + " " + _destinationKey + "\r\n");
-			return ba;
+		override public function send(stream:IDataOutput):void {
+			stream.writeUTFBytes(name + " " + _sourceKey + " " + _destinationKey + "\r\n");
 		}
 
 		override public function toStringCommand():String {

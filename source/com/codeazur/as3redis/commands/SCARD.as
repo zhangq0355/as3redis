@@ -1,8 +1,8 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import flash.utils.ByteArray;
-
 	import com.codeazur.as3redis.RedisCommand;
+	
+	import flash.utils.IDataOutput;
 	
 	public class SCARD extends RedisCommand
 	{
@@ -17,12 +17,10 @@
 			return "SCARD";
 		}
 		
-		override protected function createRequest():ByteArray {
-			var ba:ByteArray = new ByteArray();
-			ba.writeUTFBytes(name + " " + _key + "\r\n");
-			return ba;
+		override public function send(stream:IDataOutput):void {
+			stream.writeUTFBytes(name + " " + _key + "\r\n");
 		}
-
+		
 		override public function toStringCommand():String {
 			return "[" + name + " " + _key + "]";
 		}

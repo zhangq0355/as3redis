@@ -1,6 +1,7 @@
 ﻿package com.codeazur.as3redis 
 {
 	import flash.utils.ByteArray;
+	import flash.utils.IDataOutput;
 	
 	public class RedisCommand
 	{
@@ -56,6 +57,16 @@
 			return _responseBulkAsStrings;
 		}
 		
+		public function get name():String {
+			// Override in subclasses
+			throw(new Error("Please override the name getter."));
+		}
+		
+		public function send(stream:IDataOutput):void {
+			// Override in subclasses
+			stream.writeUTFBytes(name + "\r\n");
+		}
+		
 		internal function setStatus(value:String):void {
 			_status = value;
 		}
@@ -86,25 +97,6 @@
 			// Override in subclasses
 		}
 
-		public function get name():String {
-			// Override in subclasses
-			throw(new Error("Please override the name getter."));
-		}
-		
-		public function get request():ByteArray {
-			if (_request == null) {
-				_request = createRequest();
-			}
-			return _request;
-		}
-		
-		protected function createRequest():ByteArray {
-			// Override in subclasses
-			var ba:ByteArray = new ByteArray();
-			ba.writeUTFBytes(name + "\r\n");
-			return ba;
-		}
-		
 		protected function serializeValue(value:*):ByteArray {
 			var ba:ByteArray = new ByteArray();
 			if (value is String || value is Number || value is Boolean) {

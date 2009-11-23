@@ -1,6 +1,6 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	public class RPUSH extends SET
+	public class RPUSH extends LPUSH
 	{
 		public function RPUSH(key:String, value:*)
 		{

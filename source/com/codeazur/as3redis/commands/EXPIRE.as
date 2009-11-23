@@ -1,6 +1,6 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import flash.utils.ByteArray;
+	import flash.utils.IDataOutput;
 
 	import com.codeazur.as3redis.RedisCommand;
 	
@@ -19,10 +19,8 @@
 			return "EXPIRE";
 		}
 		
-		override protected function createRequest():ByteArray {
-			var ba:ByteArray = new ByteArray();
-			ba.writeUTFBytes(name + " " + _key + " " + _seconds + "\r\n");
-			return ba;
+		override public function send(stream:IDataOutput):void {
+			stream.writeUTFBytes(name + " " + _key + " " + _seconds + "\r\n");
 		}
 
 		override public function toStringCommand():String {

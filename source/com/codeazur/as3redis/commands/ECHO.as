@@ -1,8 +1,9 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import flash.utils.ByteArray;
-
 	import com.codeazur.as3redis.RedisCommand;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.IDataOutput;
 	
 	public class ECHO extends RedisCommand
 	{
@@ -17,14 +18,12 @@
 			return "ECHO";
 		}
 		
-		override protected function createRequest():ByteArray {
-			var ba:ByteArray = new ByteArray();
+		override public function send(stream:IDataOutput):void {
 			var baText:ByteArray = new ByteArray();
 			baText.writeUTFBytes(_text);
-			ba.writeUTFBytes(name + " " + baText.length + "\r\n" + _text + "\r\n");
-			return ba;
+			stream.writeUTFBytes(name + " " + baText.length + "\r\n" + _text + "\r\n");
 		}
-
+		
 		override public function toStringCommand():String {
 			return "[" + name + " " + _text + "]";
 		}

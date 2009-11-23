@@ -3,6 +3,7 @@
 	import com.codeazur.as3redis.commands.*;
 	import com.codeazur.as3redis.events.RedisMonitorDataEvent;
 	
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
@@ -10,6 +11,7 @@
 	import flash.events.SecurityErrorEvent;
 	import flash.net.Socket;
 	import flash.utils.ByteArray;
+	import flash.utils.getTimer;
 
 	public class Redis extends EventDispatcher
 	{
@@ -17,12 +19,15 @@
 		protected var idleQueue:Vector.<RedisCommand>;
 		protected var activeQueue:Vector.<RedisCommand>;
 		protected var buffer:ByteArray;
+		protected var active:Boolean = false;
 		protected var connecting:Boolean = false;
 		protected var connectResultHandler:Function;
+		protected var enterFrameProvider:Sprite;
 		
 		protected var _host:String;
 		protected var _port:int;
 		protected var _password:String;
+		protected var _immediateSend:Boolean = true;
 		
 		public function Redis(host:String = "127.0.0.1", port:int = 6379)
 		{
@@ -32,6 +37,7 @@
 			idleQueue = new Vector.<RedisCommand>();
 			activeQueue = new Vector.<RedisCommand>();
 			buffer = new ByteArray();
+			enterFrameProvider = new Sprite();
 
 			socket = new Socket();
 			socket.addEventListener(Event.CONNECT, connectHandler);
@@ -43,6 +49,9 @@
 		public function get password():String { return _password; }
 		public function set password(value:String):void { _password = value; }
 
+		public function get immediateSend():Boolean { return _immediateSend; }
+		public function set immediateSend(value:Boolean):void { _immediateSend = value; }
+		
 		public function get connected():Boolean { return socket.connected; }
 		
 		public function connect(host:String = "127.0.0.1", port:int = 6379):void {
@@ -50,14 +59,7 @@
 		}
 		
 		public function flush():void {
-			executePendingCommands();
-			for (var i:uint = 0; i < idleQueue.length; i++ ) {
-				executeCommand(idleQueue[i], false);
-			}
-			if (connected) {
-				socket.flush();
-			}
-			idleQueue.length = 0;
+			executeIdleCommands();
 		}
 		
 
@@ -333,39 +335,41 @@
 		}
 		
 		
-		protected function addCommand(command:RedisCommand, defer:Boolean = false):RedisCommand {
-			if (!defer) {
-				executeCommand(command);
-			} else {
-				idleQueue.push(command);
-			}
+		protected function addCommand(command:RedisCommand):RedisCommand {
+			idleQueue.push(command);
+			executeIdleCommands();
 			return command;
 		}
 		
-		protected function executeCommand(command:RedisCommand, flush:Boolean = true):void {
-			if (activeQueue.indexOf(command) == -1) {
-				activeQueue.push(command);
-			}
-			if (!connected) {
-				command.setStatus(RedisCommand.STATUS_PENDING);
-				if (!connecting) {
-					connectInternal(_host, _port, executePendingCommands);
-				}
-			} else {
-				//trace("sending: " + command);
-				command.setStatus(RedisCommand.STATUS_ACTIVE);
-				socket.writeBytes(command.request);
-				if (flush) {
-					socket.flush();
+		protected function executeIdleCommands():void {
+			if (!active) {
+				if (!connected) {
+					if (!connecting) {
+						connectInternal(_host, _port, executeIdleCommands);
+					}
+				} else {
+					enterFrameProvider.addEventListener(Event.ENTER_FRAME, executeIdleCommandsRunner);
+					active = true;
 				}
 			}
 		}
-
-		protected function executePendingCommands():void {
-			for (var i:uint = 0; i < activeQueue.length; i++) {
-				if (activeQueue[i].status == RedisCommand.STATUS_PENDING) {
-					executeCommand(activeQueue[i]);
+		
+		protected function executeIdleCommandsRunner(event:Event):void {
+			var startTime:Number = getTimer();
+			var command:RedisCommand;
+			while(idleQueue.length > 0) {
+				if(getTimer() - startTime < 10) {
+					command = idleQueue.shift();
+					command.send(socket);
+					activeQueue.push(command);
+				} else {
+					break;
 				}
+			}
+			socket.flush();
+			if(idleQueue.length == 0) {
+				enterFrameProvider.removeEventListener(Event.ENTER_FRAME, executeIdleCommandsRunner);
+				active = false;
 			}
 		}
 		
@@ -378,25 +382,24 @@
 		}
 
 		protected function connectHandler(e:Event):void {
+			connecting = false;
 			// Redispatch the event
 			dispatchEvent(e.clone());
 			// Authentication
 			if (_password) {
 				// A password is set, so we have to send the AUTH command first
 				var cmd:AUTH = new AUTH(_password);
-				// We immediately send it
-				cmd.setStatus(RedisCommand.STATUS_ACTIVE);
 				// Put the command at the beginning of the queue
 				activeQueue.splice(0, 0, cmd);
 				// Send the command
-				socket.writeBytes(cmd.request);
-				socket.flush();
+				cmd.send(socket);
 				// Add an internal responder that executes the result handler (if set)
 				// TODO: proper handling of errors
 				cmd.addSimpleResponder(
 					function(cmd:AUTH):void { if (connectResultHandler != null) { connectResultHandler(); } },
 					function(cmd:AUTH):void { if (connectResultHandler != null) { connectResultHandler(); } }
 				);
+				socket.flush();
 			} else {
 				if (connectResultHandler != null) { connectResultHandler(); } 
 			}
@@ -421,10 +424,9 @@
 				if (i > 0) {
 					// We found a CR/LF, and there is data available to parse
 					// Find the first active command in the queue
-					var curCommandIdx:int = getFirstActiveCommandIdx();
-					if (curCommandIdx >= 0) {
+					var command:RedisCommand = activeQueue.shift();
+					if (command != null) {
 						var len:int;
-						var command:RedisCommand = activeQueue[curCommandIdx];
 						// The first byte of a redis response is always the type indicator
 						var type:String = String.fromCharCode(buffer.readUnsignedByte());
 						// Followed by the rest, which is interpreted as a string
@@ -540,9 +542,9 @@
 								}
 								break;
 						}
-						if (commandProcessed && !(command is MONITOR)) {
-							// Remove the command whose reply we just processed from the queue
-							activeQueue.splice(curCommandIdx, 1);
+						if (!commandProcessed || (command is MONITOR)) {
+							// add command back to queue
+							activeQueue.splice(0, 0, command);
 						}
 					} else {
 						throw(new Error("No active commands found."));

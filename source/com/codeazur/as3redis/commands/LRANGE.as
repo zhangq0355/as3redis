@@ -1,8 +1,9 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import flash.utils.ByteArray;
-
 	import com.codeazur.as3redis.RedisCommand;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.IDataOutput;
 	
 	public class LRANGE extends RedisCommand
 	{
@@ -21,10 +22,8 @@
 			return "LRANGE";
 		}
 		
-		override protected function createRequest():ByteArray {
-			var ba:ByteArray = new ByteArray();
-			ba.writeUTFBytes(name + " " + _key + " " + _startIndex + " " + _endIndex + "\r\n");
-			return ba;
+		override public function send(stream:IDataOutput):void {
+			stream.writeUTFBytes(name + " " + _key + " " + _startIndex + " " + _endIndex + "\r\n");
 		}
 
 		override public function toStringCommand():String {

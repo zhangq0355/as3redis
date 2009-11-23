@@ -2,7 +2,7 @@ package com.codeazur.as3redis.commands
 {
 	import com.codeazur.as3redis.RedisCommand;
 	
-	import flash.utils.ByteArray;
+	import flash.utils.IDataOutput;
 	
 	public class SLAVEOF extends RedisCommand
 	{
@@ -19,16 +19,14 @@ package com.codeazur.as3redis.commands
 			return "SLAVEOF";
 		}
 		
-		override protected function createRequest():ByteArray {
-			var ba:ByteArray = new ByteArray();
+		override public function send(stream:IDataOutput):void {
 			if (_host != null && _host.length > 0 && _port >= 0) {
-				ba.writeUTFBytes(name + " " + _host + " " + _port + "\r\n");
+				stream.writeUTFBytes(name + " " + _host + " " + _port + "\r\n");
 			} else if (_host == null && _port < 0) {
-				ba.writeUTFBytes(name + " no one\r\n");
+				stream.writeUTFBytes(name + " no one\r\n");
 			} else {
 				throw(new Error("Host and port must both either be valid or null/-1"));
 			}
-			return ba;
 		}
 		
 		override public function toStringCommand():String {

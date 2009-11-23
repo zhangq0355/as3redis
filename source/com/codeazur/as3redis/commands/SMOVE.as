@@ -1,8 +1,9 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import flash.utils.ByteArray;
-
 	import com.codeazur.as3redis.RedisCommand;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.IDataOutput;
 	
 	public class SMOVE extends RedisCommand
 	{
@@ -21,13 +22,11 @@
 			return "SMOVE";
 		}
 		
-		override protected function createRequest():ByteArray {
-			var ba:ByteArray = new ByteArray();
+		override public function send(stream:IDataOutput):void {
 			var baValue:ByteArray = serializeValue(_value);
-			ba.writeUTFBytes(name + " " + _sourceKey + " " + _destinationKey + " " + baValue.length + "\r\n");
-			ba.writeBytes(baValue);
-			ba.writeUTFBytes("\r\n");
-			return ba;
+			stream.writeUTFBytes(name + " " + _sourceKey + " " + _destinationKey + " " + baValue.length + "\r\n");
+			stream.writeBytes(baValue);
+			stream.writeUTFBytes("\r\n");
 		}
 
 		override public function toStringCommand():String {
