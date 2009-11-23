@@ -358,7 +358,7 @@
 			var startTime:Number = getTimer();
 			var command:RedisCommand;
 			while(idleQueue.length > 0) {
-				if(getTimer() - startTime < 10) {
+				if(getTimer() - startTime < 20) {
 					command = idleQueue.shift();
 					command.send(socket);
 					activeQueue.push(command);
@@ -411,7 +411,6 @@
 		}
 		
 		protected function dataHandler(e:ProgressEvent):void {
-			// trace("received " + socket.bytesAvailable + " bytes");
 			// Read all available bytes from the socket and append them to the buffer
 			socket.readBytes(buffer, buffer.length, socket.bytesAvailable);
 			// Parse buffer from the start
@@ -588,15 +587,6 @@
 		protected function findCRLF(ba:ByteArray, startAtIndex:uint = 0):int {
 			for (var i:uint = startAtIndex; i < ba.length - 1; i++) {
 				if (ba[i] == 0x0d && ba[i + 1] == 0x0a) {
-					return i;
-				}
-			}
-			return -1;
-		}
-		
-		protected function getFirstActiveCommandIdx():int {
-			for (var i:uint = 0; i < activeQueue.length; i++) {
-				if (activeQueue[i].status == RedisCommand.STATUS_ACTIVE) {
 					return i;
 				}
 			}

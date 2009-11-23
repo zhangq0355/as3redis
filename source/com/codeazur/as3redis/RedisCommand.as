@@ -5,10 +5,6 @@
 	
 	public class RedisCommand
 	{
-		public static const STATUS_IDLE:String = "statusIdle";
-		public static const STATUS_PENDING:String = "statusPending";
-		public static const STATUS_ACTIVE:String = "statusActive";
-		
 		public static const RESPONSE_TYPE_UNDEFINED:String = "responseTypeUndefined";
 		public static const RESPONSE_TYPE_ERROR:String = "responseTypeError";
 		public static const RESPONSE_TYPE_STRING:String = "responseTypeString";
@@ -18,7 +14,6 @@
 		
 		protected var responders:Vector.<RedisResponder>;
 		
-		protected var _status:String = STATUS_IDLE;
 		protected var _request:ByteArray;
 		protected var _responseType:String = RESPONSE_TYPE_UNDEFINED;
 		protected var _responseMessage:String = "";
@@ -29,7 +24,6 @@
 		{
 		}
 		
-		public function get status():String { return _status; }
 		public function get responseType():String { return _responseType; }
 		public function get responseMessage():String { return _responseMessage; }
 		public function get responseBulk():Vector.<ByteArray> { return _responseBulk; }
@@ -65,10 +59,6 @@
 		public function send(stream:IDataOutput):void {
 			// Override in subclasses
 			stream.writeUTFBytes(name + "\r\n");
-		}
-		
-		internal function setStatus(value:String):void {
-			_status = value;
 		}
 		
 		internal function setResponseType(value:String):void {
