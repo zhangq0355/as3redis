@@ -19,6 +19,7 @@
 		}
 		
 		override public function send(stream:IDataOutput):void {
+			super.send(stream);
 			var baText:ByteArray = new ByteArray();
 			baText.writeUTFBytes(_text);
 			stream.writeUTFBytes(name + " " + baText.length + "\r\n" + _text + "\r\n");

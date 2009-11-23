@@ -1,11 +1,11 @@
 ﻿package com.codeazur.as3redis.commands
 {
+	import com.codeazur.as3redis.commands.base.SimpleCommand;
+	
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 
-	import com.codeazur.as3redis.RedisCommand;
-	
-	public class INFO extends RedisCommand
+	public class INFO extends SimpleCommand
 	{
 		public static const REDIS_VERSION:String = "redis_version";
 		public static const UPTIME_IN_SECONDS:String = "uptime_in_seconds";

@@ -1,8 +1,8 @@
 package com.codeazur.as3redis.commands
 {
-	import com.codeazur.as3redis.RedisCommand;
+	import com.codeazur.as3redis.commands.base.SimpleCommand;
 	
-	public class SHUTDOWN extends RedisCommand
+	public class SHUTDOWN extends SimpleCommand
 	{
 		public function SHUTDOWN()
 		{

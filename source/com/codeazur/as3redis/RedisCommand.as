@@ -2,6 +2,7 @@
 {
 	import flash.utils.ByteArray;
 	import flash.utils.IDataOutput;
+	import flash.utils.getTimer;
 	
 	public class RedisCommand
 	{
@@ -20,6 +21,10 @@
 		protected var _responseBulk:Vector.<ByteArray>;
 		protected var _responseBulkAsStrings:Array;
 		
+		protected var _roundtrip:Number = 0.0;
+
+		protected var starttime:Number = 0.0;
+		
 		public function RedisCommand()
 		{
 		}
@@ -27,6 +32,8 @@
 		public function get responseType():String { return _responseType; }
 		public function get responseMessage():String { return _responseMessage; }
 		public function get responseBulk():Vector.<ByteArray> { return _responseBulk; }
+
+		public function get roundtrip():Number { return _roundtrip; }
 
 		public function get responseBulkAsStrings():Array {
 			if (_responseBulkAsStrings == null) {
@@ -57,8 +64,8 @@
 		}
 		
 		public function send(stream:IDataOutput):void {
-			// Override in subclasses
-			stream.writeUTFBytes(name + "\r\n");
+			// Override in subclasses (call super!)
+			starttime = getTimer();
 		}
 		
 		internal function setResponseType(value:String):void {
@@ -137,6 +144,7 @@
 		}
 		
 		public function result():void {
+			_roundtrip = getTimer() - starttime;
 			if (hasResponders()) {
 				for (var i:uint = 0; i < responders.length; i++) {
 					if (responders[i].result != null) {
@@ -147,6 +155,7 @@
 		}
 		
 		public function fault():void {
+			_roundtrip = getTimer() - starttime;
 			if (hasResponders()) {
 				for (var i:uint = 0; i < responders.length; i++) {
 					if (responders[i].status != null) {
@@ -157,7 +166,8 @@
 		}
 
 		public function toString():String {
-			var s:String = toStringCommand();
+			var t:String = (roundtrip == -1) ? "" : " (" + roundtrip + " ms)";
+			var s:String = toStringCommand() + t;
 			if (_responseMessage != null && _responseMessage.length > 0) {
 				s += "\n  " + _responseMessage;
 			}

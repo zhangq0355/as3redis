@@ -8,7 +8,6 @@
 	public class KEYS extends RedisCommand
 	{
 		protected var _pattern:String;
-		
 		protected var _keys:Array;
 		
 		public function KEYS(pattern:String)
@@ -24,6 +23,7 @@
 		}
 		
 		override public function send(stream:IDataOutput):void {
+			super.send(stream);
 			stream.writeUTFBytes(name + " " + _pattern + "\r\n");
 		}
 

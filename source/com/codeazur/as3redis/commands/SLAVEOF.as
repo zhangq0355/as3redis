@@ -20,6 +20,7 @@ package com.codeazur.as3redis.commands
 		}
 		
 		override public function send(stream:IDataOutput):void {
+			super.send(stream);
 			if (_host != null && _host.length > 0 && _port >= 0) {
 				stream.writeUTFBytes(name + " " + _host + " " + _port + "\r\n");
 			} else if (_host == null && _port < 0) {

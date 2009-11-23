@@ -1,8 +1,8 @@
 package com.codeazur.as3redis.commands
 {
-	import com.codeazur.as3redis.RedisCommand;
+	import com.codeazur.as3redis.commands.base.SimpleCommand;
 	
-	public class LASTSAVE extends RedisCommand
+	public class LASTSAVE extends SimpleCommand
 	{
 		public function LASTSAVE()
 		{

@@ -20,6 +20,7 @@
 		}
 		
 		override public function send(stream:IDataOutput):void {
+			super.send(stream);
 			stream.writeUTFBytes(name + " " + _destinationKey + " " + _keys.join(" ") + "\r\n");
 		}
 

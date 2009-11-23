@@ -1,16 +1,16 @@
 ﻿package com.codeazur.as3redis.commands
 {
+	import com.codeazur.as3redis.RedisCommand;
+
 	import flash.utils.IDataOutput;
 
-	import com.codeazur.as3redis.RedisCommand;
-	
 	public class DEL extends RedisCommand
 	{
-		protected var _key:String;
+		protected var _keys:Array;
 		
-		public function DEL(key:String)
+		public function DEL(keys:Array)
 		{
-			_key = key;
+			_keys = keys;
 		}
 		
 		override public function get name():String {
@@ -18,11 +18,17 @@
 		}
 		
 		override public function send(stream:IDataOutput):void {
-			stream.writeUTFBytes(name + " " + _key + "\r\n");
+			super.send(stream);
+			var cmd:String = name;
+			for (var i:uint = 0; i < _keys.length; i++) {
+				cmd += " " + _keys[i];
+			}
+			cmd += "\r\n";
+			stream.writeUTFBytes(cmd);
 		}
 
 		override public function toStringCommand():String {
-			return "[" + name + " " + _key + "]";
+			return "[" + name + ((_keys.length > 0) ? " " + _keys.join(" ") : "") + "]";
 		}
 	}
 }

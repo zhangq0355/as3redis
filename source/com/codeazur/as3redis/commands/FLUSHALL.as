@@ -1,8 +1,8 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import com.codeazur.as3redis.RedisCommand;
+	import com.codeazur.as3redis.commands.base.SimpleCommand;
 	
-	public class FLUSHALL extends RedisCommand
+	public class FLUSHALL extends SimpleCommand
 	{
 		public function FLUSHALL()
 		{

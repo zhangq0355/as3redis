@@ -23,6 +23,7 @@
 		}
 		
 		override public function send(stream:IDataOutput):void {
+			super.send(stream);
 			var baValue:ByteArray = serializeValue(_value);
 			stream.writeUTFBytes(name + " " + _key  + " " + _count + " " + baValue.length + "\r\n");
 			stream.writeBytes(baValue);

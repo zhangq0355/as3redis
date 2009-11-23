@@ -1,8 +1,8 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import com.codeazur.as3redis.RedisCommand;
+	import com.codeazur.as3redis.commands.base.SimpleCommand;
 	
-	public class FLUSHDB extends RedisCommand
+	public class FLUSHDB extends SimpleCommand
 	{
 		public function FLUSHDB()
 		{

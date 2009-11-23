@@ -1,28 +1,16 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import flash.utils.IDataOutput;
-
-	import com.codeazur.as3redis.RedisCommand;
+	import com.codeazur.as3redis.commands.base.KeyCommand;
 	
-	public class SPOP extends RedisCommand
+	public class SPOP extends KeyCommand
 	{
-		protected var _key:String;
-		
 		public function SPOP(key:String)
 		{
-			_key = key;
+			super(key);
 		}
 		
 		override public function get name():String {
 			return "SPOP";
-		}
-		
-		override public function send(stream:IDataOutput):void {
-			stream.writeUTFBytes(name + " " + _key + "\r\n");
-		}
-		
-		override public function toStringCommand():String {
-			return "[" + name + " " + _key + "]";
 		}
 	}
 }

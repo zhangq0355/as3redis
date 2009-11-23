@@ -1,9 +1,9 @@
 ﻿package com.codeazur.as3redis.commands
 {
+	import com.codeazur.as3redis.RedisCommand;
+
 	import flash.utils.IDataOutput;
 
-	import com.codeazur.as3redis.RedisCommand;
-	
 	public class DECRBY extends RedisCommand
 	{
 		protected var _key:String;
@@ -20,6 +20,7 @@
 		}
 		
 		override public function send(stream:IDataOutput):void {
+			super.send(stream);
 			stream.writeUTFBytes(name + " " + _key + " " + _value + "\r\n");
 		}
 

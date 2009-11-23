@@ -116,8 +116,8 @@
 			return addCommand(new EXISTS(key));
 		}
 
-		public function sendDEL(key:String):RedisCommand {
-			return addCommand(new DEL(key));
+		public function sendDEL(keys:Array):RedisCommand {
+			return addCommand(new DEL(keys));
 		}
 		
 		public function sendTYPE(key:String):RedisCommand {
@@ -388,20 +388,10 @@
 			// Authentication
 			if (_password) {
 				// A password is set, so we have to send the AUTH command first
-				var cmd:AUTH = new AUTH(_password);
-				// Put the command at the beginning of the queue
-				activeQueue.splice(0, 0, cmd);
-				// Send the command
-				cmd.send(socket);
-				// Add an internal responder that executes the result handler (if set)
-				// TODO: proper handling of errors
-				cmd.addSimpleResponder(
-					function(cmd:AUTH):void { if (connectResultHandler != null) { connectResultHandler(); } },
-					function(cmd:AUTH):void { if (connectResultHandler != null) { connectResultHandler(); } }
-				);
-				socket.flush();
-			} else {
-				if (connectResultHandler != null) { connectResultHandler(); } 
+				idleQueue.splice(0, 0, new AUTH(_password));
+			}
+			if (connectResultHandler != null) {
+				connectResultHandler();
 			}
 		}
 		

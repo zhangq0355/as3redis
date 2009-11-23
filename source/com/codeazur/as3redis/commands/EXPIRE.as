@@ -1,8 +1,8 @@
 ﻿package com.codeazur.as3redis.commands
 {
-	import flash.utils.IDataOutput;
-
 	import com.codeazur.as3redis.RedisCommand;
+	
+	import flash.utils.IDataOutput;
 	
 	public class EXPIRE extends RedisCommand
 	{
@@ -20,6 +20,7 @@
 		}
 		
 		override public function send(stream:IDataOutput):void {
+			super.send(stream);
 			stream.writeUTFBytes(name + " " + _key + " " + _seconds + "\r\n");
 		}
 
