@@ -50,7 +50,8 @@
 		}
 
 		override public function toString():String {
-			var s:String = toStringCommand();
+			var t:String = (roundtrip == -1) ? "" : " (" + roundtrip + " ms)";
+			var s:String = toStringCommand() + t;
 			if (params[ROLE]) { s += "\r  Role: " + params[ROLE]; }
 			if (params[REDIS_VERSION]) { s += "\r  RedisVersion: " + params[REDIS_VERSION]; }
 			if (params[USED_MEMORY]) { s += "\r  UsedMemory: " + params[USED_MEMORY]; }

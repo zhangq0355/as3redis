@@ -264,6 +264,37 @@
 		}
 		
 		
+		// Commands operating on sorted sets (zsets, Version 1.1)
+
+		public function sendZADD(key:String, score:Number, value:*):RedisCommand {
+			return addCommand(new ZADD(key, score, value));
+		}
+
+		public function sendZREM(key:String, value:*):RedisCommand {
+			return addCommand(new ZREM(key, value));
+		}
+		
+		public function sendZRANGE(key:String, startIndex:int, endIndex:int):RedisCommand {
+			return addCommand(new ZRANGE(key, startIndex, endIndex));
+		}
+		
+		public function sendZREVRANGE(key:String, startIndex:int, endIndex:int):RedisCommand {
+			return addCommand(new ZREVRANGE(key, startIndex, endIndex));
+		}
+		
+		public function sendZRANGEBYSCORE(key:String, minScore:Number, maxScore:Number):RedisCommand {
+			return addCommand(new ZRANGEBYSCORE(key, minScore, maxScore));
+		}
+		
+		public function sendZCARD(key:String):RedisCommand {
+			return addCommand(new ZCARD(key));
+		}
+		
+		public function sendZSCORE(key:String, value:*):RedisCommand {
+			return addCommand(new ZSCORE(key, value));
+		}
+		
+		
 		// Multiple databases handling commands
 		
 		public function sendSELECT(dbIndex:uint):RedisCommand {

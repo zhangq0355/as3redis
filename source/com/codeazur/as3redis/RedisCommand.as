@@ -21,7 +21,7 @@
 		protected var _responseBulk:Vector.<ByteArray>;
 		protected var _responseBulkAsStrings:Array;
 		
-		protected var _roundtrip:Number = 0.0;
+		protected var _roundtrip:Number = -1.0;
 
 		protected var starttime:Number = 0.0;
 		
