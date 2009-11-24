@@ -154,6 +154,16 @@
 		public function sendTTL(key:String):RedisCommand {
 			return addCommand(new TTL(key));
 		}
+		
+		// Version 1.1
+		public function sendMSET(keys:Array, values:Array):RedisCommand {
+			return addCommand(new MSET(keys, values));
+		}
+		
+		// Version 1.1
+		public function sendMSETNX(keys:Array, values:Array):RedisCommand {
+			return addCommand(new MSETNX(keys, values));
+		}
 
 		
 		// Commands operating on lists
@@ -264,7 +274,8 @@
 		}
 		
 		
-		// Commands operating on sorted sets (zsets, Version 1.1)
+		// Version 1.1
+		// Commands operating on sorted sets (zsets)
 
 		public function sendZADD(key:String, score:Number, value:*):RedisCommand {
 			return addCommand(new ZADD(key, score, value));
